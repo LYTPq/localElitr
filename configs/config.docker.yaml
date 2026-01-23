@@ -1,0 +1,46 @@
+paths:
+  py: "python3" 
+  wh_pythonpath: "/app/SimulStreaming"
+  
+  final_segments: "/app/final_segments.py" 
+
+  start_services: "/app/start_services.sh"
+  ct2_server: "/app/ct2_server.py"
+  ct2_client: "/app/ct2_client.py"
+  fix: "/app/fix-casing.py"
+  last_flush: "/app/last_flush.py"
+  audio: "/app/audio/Appolo_conv.wav"
+
+  mtw: "/app/mt-wrapper/mtwrapper.py"
+  whisper_server: "/app/SimulStreaming/simulstreaming_whisper_server.py"
+
+models:
+  ct2_model_dir: "/models/ct2/nllb200_600m_new"
+  hf_tokenizer: "/models/hf/nllb-200-distilled-600M"
+  whisper_model: "/models/whisper/large-v3-turbo.pt"
+
+ports:
+  ct2: 6006
+  asr: 43001
+  textflow: 5000
+
+langs: [de, ru, fr]
+
+ct2:
+  device: cpu
+  inter_threads: 8     
+  intra_threads: 16
+  beam: 1
+
+whisper:
+  task: transcribe
+  language: en
+  beams: 5
+  frame_threshold: 50
+  vac: true
+  vac_chunk_size: 0.04
+  min_chunk_size: 1.5
+  audio_min_len: 1.0
+  audio_max_len: 15.0
+  init_prompt: "Thank you."
+  log_level: INFO

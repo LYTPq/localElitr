@@ -1,0 +1,15 @@
+pyyaml
+ctranslate2
+transformers
+mosestokenizer
+websocket-client
+flask
+more-itertools
+networkx==2.5
+librosa
+tqdm
+tiktoken
+triton>=2.0.0,<3;platform_machine=="x86_64" and sys_platform=="linux" or sys_platform=="linux2"
+torch
+torchaudio
+numpy<2.0

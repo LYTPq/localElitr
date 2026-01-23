@@ -1,0 +1,15 @@
+# --- User Requested Ignores ---
+models/
+logs/
+mt-wrapper/
+pipeliner/
+online-text-flow/
+SimulStreaming/
+__pycache__/
+test_wav/
+
+# --- Standard Python & Docker Ignores ---
+*.pyc
+venv/
+.env
+pipeline.sh
