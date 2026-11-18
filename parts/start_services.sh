@@ -34,6 +34,7 @@ fi
   --lan "$WH_LANGUAGE" --task "$WH_TASK" \
   --model_path "$WHISPER_MODEL" \
   --beams "$WH_BEAMS" --frame_threshold "$WH_FRAME_THRESHOLD" \
+  --out-txt \
   "${vac_flags[@]}" \
   --min-chunk-size "$WH_MIN_CHUNK_SIZE" \
   --audio_min_len "$WH_AUDIO_MIN_LEN" --audio_max_len "$WH_AUDIO_MAX_LEN" \

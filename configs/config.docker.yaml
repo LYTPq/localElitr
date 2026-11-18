@@ -27,10 +27,10 @@ ports:
 langs: [de, ru, fr]       
 
 ct2:
-  device: cpu            #change to "cuda" in case of gpu
-  inter_threads: 8     
-  intra_threads: 16
-  beam: 1
+  device: cuda            #change to "cuda" in case of gpu
+  inter_threads: 1     
+  intra_threads: 4
+  beam: 4
 
 whisper:
   task: transcribe
@@ -42,5 +42,5 @@ whisper:
   min_chunk_size: 1.5
   audio_min_len: 1.0
   audio_max_len: 15.0
-  init_prompt: "Thank you."
+  init_prompt: "Hello, everyone. Today we'll talk about physics: energy, work, and mass. Let's begin."
   log_level: INFO

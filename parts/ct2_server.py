@@ -173,7 +173,7 @@ def main():
     translator = ctranslate2.Translator(
         args.ct2_model,
         device=args.device,
-        compute_type="int8" if args.device=="cpu" else "float16",
+        compute_type="int8" if args.device=="cpu" else "int8_float16",
         inter_threads=args.inter_threads,
         intra_threads=args.intra_threads
     )
