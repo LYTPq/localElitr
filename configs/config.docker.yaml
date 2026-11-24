@@ -11,20 +11,23 @@ paths:
   last_flush: "/app/last_flush.py"
   audio: "/app/audio/Appolo_conv.wav"
 
+  lang_manager: "/app/lang_manager.py"
+
   mtw: "/app/mt-wrapper/mtwrapper.py"
   whisper_server: "/app/SimulStreaming/simulstreaming_whisper_server.py"
 
 models:
-  ct2_model_dir: "/models/ct2/nllb200_600m_new"
-  hf_tokenizer: "/models/hf/nllb-200-distilled-600M"
+  ct2_model_dir: "/models/ct2/nllb200_1.3b_new"   #600_m_new is int8_float_16
+  hf_tokenizer: "/models/hf/nllb-200-distilled-1.3B"
   whisper_model: "/models/whisper/large-v3-turbo.pt"
 
 ports:
   ct2: 6006
   asr: 43001
   textflow: 5000
+  langman: 5001          
 
-langs: [de, ru, fr]       
+langs: [de, ru, cs]       
 
 ct2:
   device: cuda            #change to "cuda" in case of gpu

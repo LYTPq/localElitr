@@ -11,11 +11,7 @@ CFG_MAX_LINE_BYTES = 6500
 
 BATCH_DELIM = "|||"
 
-NLLB = {
-  "en": "eng_Latn", "ru": "rus_Cyrl", "de": "deu_Latn",
-  "fr": "fra_Latn", "es": "spa_Latn", "it": "ita_Latn",
-  "uk": "ukr_Cyrl", "pl": "pol_Latn",
-}
+from nllb_langs import NLLB  # shared with lang_manager.py
 
 CACHE_MAX = 50000
 _cache = OrderedDict()

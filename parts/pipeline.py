@@ -57,6 +57,7 @@ def main():
     FIX = must(paths, "fix")
     LAST_FLUSH = must(paths, "last_flush")
     START_SERVICES = must(paths, "start_services")
+    LANG_MANAGER = paths.get("lang_manager", "/app/lang_manager.py")
    # AUDIO_SOURCE = must(paths, "audio")
 
     
@@ -64,6 +65,7 @@ def main():
     CT2_PORT = int(must(ports, "ct2"))
     ASR_PORT = int(must(ports, "asr"))
     TF_PORT  = int(must(ports, "textflow"))
+    LANGMAN_PORT = int(ports.get("langman", 5001))
 
     LANGS = must(cfg, "langs")
     config_exports = generate_env(cfg)
@@ -145,32 +147,32 @@ def main():
     p.addSimpleEdge(fix_asr, last_flush)
     p.addSimpleEdge(last_flush, textflow_en)
 
-    # translation branches
-    for lang in LANGS:
-        mt_cmd = (
-            f"stdbuf -oL {MTW} en "
-            f"--eventsIn "
-            f"--batch-delimiter '|||' "
-            f"--min_status 0 "
-            f"--mt '{PY} -u {CT2_CLIENT} --tgt {lang} --host {LOCALHOST} --port {CT2_PORT}'"
-        )
-        
-        mt = p.addLocalNode(
-            f"mtwrapper_{lang}",
-            {"events_in": "stdin"},
-            {"events_out": "stdout"},
-            mt_cmd
-        )
+    # translation branches: started/stopped at runtime by the language manager
+    # (one mt-wrapper -> ct2_client -> textflow client per active language)
 
-        client = p.addLocalNode(
-            f"textflow_client_{lang}",
-            {"events_out": "stdin"},
-            {},
-            f"stdbuf -oL online-text-flow client -b {lang} ws://{LOCALHOST}:{TF_PORT}/textflow"
-        )
+    # langs from the config are switched on at start, the textflow language
+    # buttons switch languages on/off via http://.../textflow/lang/<code>/on|off
+    lang_manager_cmd = " ".join(shlex.quote(str(x)) for x in [
+        PY, "-u", LANG_MANAGER,
+        "--src", "en",
+        "--port", LANGMAN_PORT,
+        "--host", LOCALHOST,
+        "--ct2-port", CT2_PORT,
+        "--tf-port", TF_PORT,
+        "--py", PY,
+        "--mtw", MTW,
+        "--ct2-client", CT2_CLIENT,
+        "--langs", *LANGS,
+    ])
 
-        p.addSimpleEdge(last_flush, mt)
-        p.addSimpleEdge(mt, client)
+    lang_manager = p.addLocalNode(
+        "lang_manager",
+        {"in": "stdin"},
+        {},
+        lang_manager_cmd
+    )
+
+    p.addSimpleEdge(last_flush, lang_manager)
 
     p.createPipeline()
 
