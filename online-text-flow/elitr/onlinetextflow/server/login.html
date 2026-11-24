@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+
+<title>ELITR Online Text Flow</title>
+
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+<style>
+  :root {
+    --elitrblue: rgb(10, 80, 225);
+    margin: 16px;
+  }
+
+  .row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+  }
+
+  .column {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .flash {
+    background-color: orange;
+    color: white;
+  }
+
+  .button {
+    background-color: var(--elitrblue);
+    color: white;
+    margin: 16px 0px;
+  }
+
+  input {
+    margin: 16px 0px;
+  }
+
+  a {
+    color: var(--elitrblue);
+    text-decoration: none;
+  }
+
+  img {
+    display: block;
+  }
+</style>
+
+<div class="row">
+  <div class="column">
+    <h1>ELITR <a href="https://github.com/ELITR/online-text-flow">Online Text Flow</a></h1>
+    <form action="{{ login }}" method="POST">
+      <div class="w3-container">
+        <input type="username" name="user" placeholder="username" class="w3-input w3-border">
+        <input type="password" name="pass" placeholder="password" class="w3-input w3-border">
+        <button class="button w3-btn">Log In</button>
+      </div>
+    </form>
+  </div>
+  <div class="column">
+    <a href="https://elitr.eu/">
+      <img src="https://elitr.eu/wp-content/uploads/2019/01/logo-elitr-300x268.png" width="300" height="268">
+    </a>
+  </div>
+</div>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div id="flash" class="row">
+  <div class="column w3-half">
+    {% for message in messages %}
+    <div class="flash w3-panel w3-card w3-center">{{ message }}</div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endwith %}
+
+<script>
+  setTimeout(function () {
+      let elem = document.getElementById("flash");
+      if (elem) {
+        elem.style.display = "none";
+      }
+    }, 3000);
+</script>

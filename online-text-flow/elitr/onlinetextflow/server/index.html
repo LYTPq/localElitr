@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+
+<title>ELITR Online Text Flow</title>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"
+        integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+        crossorigin="anonymous"></script>
+
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+        integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+        crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"
+      integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w=="
+      crossorigin="anonymous">
+
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+<style>
+  :root {
+    --elitrblue: rgb(10, 80, 225);
+    margin: 8px;
+    overflow-y: scroll;
+    scroll-behavior: auto; /*!!!*/
+  }
+
+  body {
+    line-height: normal;
+  }
+
+  .row {
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+  }
+
+  .column {
+    flex: 1 1 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-right: 10px;
+    position: relative; /*!!!*/
+  }
+
+  .column.hide {
+    display: none;
+  }
+
+  .complete {
+    display: table-row-group;
+    color: black;
+  }
+
+  .expected {
+    display: table-row-group;
+    color: gray;
+  }
+
+  .incoming {
+    display: table-row-group;
+    color: silver;
+  }
+
+  .flexible {
+    height: 300px; /*!!!*/
+  }
+
+  .flow {
+    display: table;
+    table-layout: fixed;
+    width: 100%; /*!!!*/
+  }
+
+  .data {
+    display: table-row;
+  }
+
+  .item {
+    display: table-cell;
+    padding-right: 10px;
+    vertical-align: top;
+  }
+
+  .complete .idx {
+    color: silver;
+  }
+
+  .expected .idx {
+    color: orange;
+  }
+
+  .incoming .idx {
+    color: red;
+  }
+
+  .idx {
+    text-align: right;
+    padding-right: 1ex;
+    width: 5ex;
+  }
+
+  .idx::after {
+    content: ".";
+  }
+
+  .fst, .snd {
+    display: none;
+  }
+
+  .trd {
+    {% if debug %}
+    cursor: pointer;
+    {% endif %}
+  }
+
+  .ar .trd, .he .trd {
+    direction: rtl;
+  }
+
+  .empty::before {
+    content: "no text yet";
+    font-style: italic;
+  }
+
+  h1 {
+    text-transform: uppercase;
+    margin: 230px 0px 0px;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  img {
+    display: block;
+    margin: 5px 0px 20px 0px;
+  }
+
+  .bar {
+    position: fixed;
+    top: 0px;
+    bottom: 0px;
+    right: 0px;
+    width: 80px;
+  }
+
+  .bar button {
+    display: block;
+    width: 60px;
+    padding: 8px 0px;
+    margin: 5px 10px;
+    border: 1px solid var(--elitrblue);
+    font-weight: bold;
+    text-transform: uppercase;
+    color: white;
+    background-color: var(--elitrblue);
+  }
+
+  .bar button.hide {
+    color: var(--elitrblue);
+    background-color: white;
+  }
+
+  #display button {
+    display: block;
+    width: 40px;
+    height: 35px;
+    padding: 4px 0px;
+    margin: 2px 4px;
+    border: 1px solid var(--elitrblue);
+    font-weight: bold;
+    text-transform: uppercase;
+    color: white;
+    background-color: var(--elitrblue);
+  }
+
+  #display button.hide {
+    color: var(--elitrblue);
+    background-color: white;
+  }
+
+  #content {
+    padding-right: 80px;
+  }
+
+  #upper {
+
+  }
+
+  #lower {
+    position: absolute;
+    bottom: 10px;
+  }
+
+  #control {
+
+  }
+
+  #preview {
+    background-color: white;
+    width: 320px;
+    height: 180px;
+    position: fixed; /*!!!*/
+    top: 8px;
+    left: 8px;
+    margin: 20px 0px; /*!!!*/
+  }
+
+  #display {
+    position: fixed;
+    top: 8px;
+    right: 100px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    height: 220px;
+    width: 440px;
+    padding: 4px 4px 0px;
+    background-color: white;
+  }
+
+  iframe {
+    width: 100%;
+    height: 100%;
+  }
+
+  .draggable {
+    cursor: grab;
+    height: 20px;
+    width: 100%;
+    position: absolute;
+    top: -20px;
+    right: 0px;
+    padding: 2px 3px 3px;
+    text-align: left;
+    color: white;
+    background-color: red;
+  }
+
+  .draggable:hover {
+    cursor: grab;
+  }
+
+  .resizable {
+    cursor: nwse-resize;
+    height: 20px;
+    width: 100%;
+    position: absolute;
+    bottom: -20px;
+    left: 0px;
+    padding: 2px 3px 3px;
+    text-align: right;
+    color: white;
+    background-color: orange;
+  }
+
+  .resizable:hover {
+    cursor: nwse-resize;
+  }
+
+  .ui-draggable-dragging:after {
+    content: "";
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+  }
+
+  .ui-resizable-resizing:after {
+    content: "";
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+  }
+</style>
+
+<div class="row" id="content"></div>
+<div class="bar">
+  <a href="https://elitr.eu/" target="_blank">
+    <img src="https://elitr.eu/wp-content/uploads/2019/01/logo-elitr-300x268.png" width="75" height="67">
+  </a>
+  <div id="upper">
+    <button onclick="display(this)" class="w3-btn w3-animate-right" title="language menu">
+      <i class="fas fa-language" style="font-size: 200%"></i>
+    </button>
+  </div>
+  <div id="lower">
+    {% if view %}
+    <button onclick="preview(this)" class="w3-btn w3-animate-right" title="video preview">
+      <i class="fas fa-tv"></i>
+    </button>
+    {% endif %}
+    <button onclick="refresh()" class="w3-btn" id="scroll" title="text scrolling">
+      <i id="iconic" class="fas fa-sync"></i>
+    </button>
+  </div>
+</div>
+{% if view %}
+<div id="preview" class="w3-card w3-animate-top">
+  <div class="draggable w3-card">
+    <i class="fas fa-hand-paper"></i>
+  </div>
+  <iframe src="{{ view }}" frameborder="0"
+          allow="accelerometer; autoplay; encrypted-media; fullscreen; gyroscope; picture-in-picture"></iframe>
+  <div class="resizable w3-card">
+    <i class="fas fa-expand-alt fa-flip-horizontal"></i>
+  </div>
+</div>
+{% endif %}
+<div id="display" class="w3-card w3-animate-top"></div>
+
+<script>
+  var menu = new Set({{ menu | tojson }});
+
+  var code = '';
+  for (let kind of menu) {
+    code += '<div class="column ' + kind + '" id="column-' + kind + '">' +
+            '<h1>' + kind + '</h1>' +
+            '<div class="events flow">' +
+            '<div class="complete" id="complete-' + kind + '"></div>' +
+            '<div class="expected" id="expected-' + kind + '">' +
+            '<div class="empty"></div></div>' +
+            '<div class="incoming" id="incoming-' + kind + '"></div>' +
+            '<div class="flexible" id="flexible-' + kind + '"></div>' +
+            '</div>' +
+            '</div>';
+  }
+  document.getElementById("content").innerHTML = code;
+
+  var code = '';
+  for (let kind of menu) {
+    code += '<button onclick="control(this)" class="w3-btn" name="' + kind +
+                  '" id="button-' + kind + '">' + kind + '</button>';
+  }
+  document.getElementById("display").innerHTML = code;
+
+  var scroll = document.getElementById("scroll");
+  var iconic = document.getElementById("iconic");
+  var canvas = document.documentElement;
+  var review = 0;
+
+  var events = new EventSource({{ data | tojson }});
+
+  var node = function (data) {
+    var elem = document.createElement("div");
+    elem.className = "data";
+    elem.innerHTML = html(data);
+    return elem;
+  }
+
+  var html = function (data) {
+    var zero = data[0] + '' // need the string not promise
+    zero = zero.substring(0, zero.length - 2);
+    return '<div class="idx item">' + zero    + '</div>' +
+           '<div class="fst item">' + data[0] + '</div>' +
+           '<div class="snd item">' + data[1] + '</div>' +
+           '<div' + {% if debug %}
+                    ' onclick="popup(this)"' +
+                    {% endif %}
+               ' class="trd item">' + data[2] + '</div>';
+  }
+
+  {% if debug %}
+  var popup = function (elem) {
+    var wind = window.open("", "_blank");
+    var code = '<!DOCTYPE html>' + elem.parentElement.innerHTML;
+    wind.document.open();
+    wind.document.write(code);
+    wind.document.close();
+  }
+  {% endif %}
+
+  var listen = {};
+
+  for (let kind of menu) {
+
+    let complete = document.getElementById("complete-" + kind);
+    let expected = document.getElementById("expected-" + kind);
+    let incoming = document.getElementById("incoming-" + kind);
+    let flexible = document.getElementById("flexible-" + kind);
+
+    let column = complete.parentElement.parentElement;
+    let height = parseInt(window.getComputedStyle(flexible)
+                                .getPropertyValue("height"));
+
+    flexible.style.height = (height - expected.scrollHeight) + "px";
+
+    listen[kind] = function (event) {
+
+      var json = JSON.parse(event.data);
+
+      var over = canvas.scrollHeight - canvas.scrollTop - canvas.clientHeight;
+      var diff = complete.scrollHeight;
+
+      for (let data of json.text.complete) {
+        complete.appendChild(node(data));
+      }
+      diff = complete.scrollHeight - diff;
+
+      expected.innerHTML = '';
+      for (let data of json.text.expected) {
+        expected.appendChild(node(data));
+      }
+
+      incoming.innerHTML = '';
+      for (let data of json.text.incoming) {
+        incoming.appendChild(node(data));
+      }
+
+      var high = height - expected.scrollHeight - incoming.scrollHeight;
+
+      flexible.style.height = (high > 0 ? high : 0) + "px";
+
+      if (over < height) {
+        if (canvas.scrollHeight > canvas.clientHeight ||
+            column.parentElement.scrollHeight > column.scrollHeight) {
+          let top = parseInt(column.style.top) || 0;
+          column.style.top = (top + diff - (high < 0 ? high : 0)) + "px";
+        }
+        canvas.scroll(0, canvas.scrollHeight);
+        scroll.classList.toggle("hide", false);
+        iconic.classList.toggle("w3-spin", false);
+      }
+      else {
+        scroll.classList.toggle("hide", true);
+        iconic.classList.toggle("w3-spin", true);
+      }
+    }
+  }
+
+  let show = JSON.parse(sessionStorage.getItem("show") || "null") || {{ show | tojson }};
+
+  var hide = new Set(menu);
+  for (let kind of show) {
+    hide.delete(kind);
+  }
+
+  for (let kind of hide) {
+    document.getElementById("button-" + kind).classList.toggle("hide");
+    document.getElementById("column-" + kind).classList.toggle("hide");
+  }
+
+  for (let kind of show) {
+    events.addEventListener(kind, listen[kind]);
+    $("#content").append($("#column-" + kind));
+  }
+
+  events.onmessage = function (event) {
+    for (let kind of show) {
+      listen[kind](event);
+    }
+  }
+
+  var cols = document.getElementsByClassName("column");
+
+  // localElitr: tell the language manager to start/stop the translation for this language
+  var langman = function (kind, state) {
+    fetch("lang/" + encodeURIComponent(kind) + "/" + state)
+      .then(function (resp) { return resp.json(); })
+      .then(function (data) { console.log("lang manager:", kind, state, data); })
+      .catch(function (err) { console.log("lang manager error:", kind, state, err); });
+  }
+
+  var control = function (elem) {
+    let kind = elem.name;
+    elem.classList.toggle("hide");
+    document.getElementById("column-" + kind).classList.toggle("hide");
+    for (let column of cols) {
+      column.style.top = "0px";
+    }
+    canvas.scroll(0, canvas.scrollHeight);
+    scroll.classList.toggle("hide", false);
+    iconic.classList.toggle("w3-spin", false);
+    let show = JSON.parse(sessionStorage.getItem("show") || "null") || {{ show | tojson }};
+    let indx = show.indexOf(kind);
+    if (indx < 0) {
+      show.push(kind);
+      hide.delete(kind);
+      events.addEventListener(kind, listen[kind]);
+      $("#content").append($("#column-" + kind));
+      langman(kind, "on");
+    }
+    else {
+      show.splice(indx, 1);
+      hide.add(kind);
+      events.removeEventListener(kind, listen[kind]);
+      langman(kind, "off");
+    }
+    sessionStorage.setItem("show", JSON.stringify(show));
+  }
+
+  var refresh = function () {
+    scroll.classList.toggle("hide");
+    iconic.classList.toggle("w3-spin");
+    for (let column of cols) {
+      column.style.top = "0px";
+    }
+    if (scroll.classList.contains("hide")) {
+      canvas.scroll(0, review);
+    }
+    else {
+      review = canvas.scrollTop;
+      canvas.scroll(0, canvas.scrollHeight);
+    }
+  }
+
+  var display = function (elem) {
+    elem.classList.toggle("hide");
+    $("#display").toggle();
+  }
+
+  $("#display").sortable();
+
+  {% if view %}
+  var preview = function (elem) {
+    elem.classList.toggle("hide");
+    $("#preview").toggle();
+  }
+
+  $("#preview").draggable({
+    handle: ".draggable",
+    scroll: false,
+    containment: "window"
+  });
+
+  $("#preview").resizable({
+    handles: {
+      "s": ".resizable"
+    },
+    aspectRatio: 16 / 9,
+    minHeight: 90
+  });
+  {% endif %}
+
+  setInterval(function () {
+      for (let column of cols) {
+        let top = parseInt(column.style.top) || 0;
+        if (top > 0) {
+          top -= Math.max(8, Math.floor(top / 25));
+          column.style.top = (top > 0 ? top : 0) + "px";
+        }
+      }
+    }, 40);
+</script>
